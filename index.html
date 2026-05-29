@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>品牌素材图库</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <div class="logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>品牌图库</span>
+      </div>
+      <nav>
+        <a href="#" class="nav-item active" data-view="library">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          图库
+        </a>
+        <a href="#" class="nav-item" data-view="upload">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          添加素材
+        </a>
+        <a href="#" class="nav-item" data-view="settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0M4.93 19.07a10 10 0 0 0 14.14 0"/><path d="M12 2v2m0 18v-2M2 12h2m18 0h-2"/></svg>
+          设置
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="stat-pill" id="sideTotal">0 张素材</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- 图库视图 -->
+      <div id="viewLibrary" class="view active">
+        <div class="view-header">
+          <h1>全部素材</h1>
+          <div class="header-actions">
+            <div class="search-wrap">
+              <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="searchInput" placeholder="搜索品牌或产品名…" oninput="renderLibrary()">
+            </div>
+            <select id="filterBrand" onchange="renderLibrary()"><option value="">全部品牌</option></select>
+            <select id="filterCat" onchange="renderLibrary()"><option value="">全部品类</option></select>
+          </div>
+        </div>
+        <div class="brand-chips" id="brandChips"></div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-lbl">总图片</div></div>
+          <div class="stat-card"><div class="stat-num" id="statBrands">0</div><div class="stat-lbl">品牌数</div></div>
+          <div class="stat-card"><div class="stat-num" id="statCats">0</div><div class="stat-lbl">品类数</div></div>
+        </div>
+        <div id="libraryGrid" class="grid"></div>
+        <div id="loadingOverlay" class="loading-overlay" style="display:none">
+          <div class="spinner"></div>
+          <span>加载图库中…</span>
+        </div>
+      </div>
+
+      <!-- 添加素材视图 -->
+      <div id="viewUpload" class="view">
+        <div class="view-header"><h1>添加素材</h1></div>
+        <div class="upload-layout">
+          <div class="upload-form">
+            <div class="section-card">
+              <h2>素材信息</h2>
+              <div class="field">
+                <label>品牌名称 <span class="req">*</span></label>
+                <input type="text" id="inBrand" placeholder="如：Givenchy、卡姿兰" list="brandList">
+                <datalist id="brandList"></datalist>
+              </div>
+              <div class="field">
+                <label>产品名称 <span class="req">*</span></label>
+                <input type="text" id="inName" placeholder="如：纪梵希禁忌之吻口红 N37">
+              </div>
+              <div class="field">
+                <label>品类</label>
+                <select id="inCat">
+                  <option>口红/唇膏</option>
+                  <option>粉底液/气垫</option>
+                  <option>眼影盘</option>
+                  <option>腮红/修容</option>
+                  <option>香水</option>
+                  <option>护肤品</option>
+                  <option>面膜</option>
+                  <option>其他</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>上传图片</label>
+                <div class="drop-zone" id="dropZone">
+                  <input type="file" id="inFile" accept="image/*" onchange="onFileChange(event)">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <p>拖拽图片到此处，或 <span class="link">点击选择文件</span></p>
+                  <p class="hint">支持 JPG、PNG、WEBP</p>
+                </div>
+              </div>
+              <div class="field">
+                <label>或粘贴图片 URL</label>
+                <div style="display:flex;gap:8px">
+                  <input type="text" id="inUrl" placeholder="https://...">
+                  <button class="btn-secondary" onclick="loadUrlPreview()">载入</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="upload-preview">
+            <div class="section-card">
+              <h2>预览 &amp; 抠图</h2>
+              <div class="preview-grid">
+                <div class="preview-box">
+                  <div class="preview-label">原图</div>
+                  <div class="preview-area" id="srcPreview">
+                    <div class="preview-empty">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      <span>原图预览</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="preview-box">
+                  <div class="preview-label">抠图结果</div>
+                  <div class="preview-area checker" id="resultPreview">
+                    <div class="preview-empty">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".3"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                      <span>透明背景效果</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="action-row">
+                <button class="btn-secondary" onclick="doRemoveBg()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                  开始抠图
+                </button>
+                <button class="btn-primary" onclick="saveToLibrary()" id="btnSave" disabled>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                  保存到图库
+                </button>
+              </div>
+              <div class="status-bar" id="upStatus">
+                <span class="dot" id="upDot"></span>
+                <span id="upMsg">就绪 — 请载入图片</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 设置视图 -->
+      <div id="viewSettings" class="view">
+        <div class="view-header"><h1>设置</h1></div>
+        <div class="settings-layout">
+          <div class="section-card">
+            <h2>Remove.bg 抠图配置</h2>
+            <p class="desc">用于自动去除图片背景。<a href="https://www.remove.bg/api" target="_blank">免费注册↗</a> 每月 50 次额度。</p>
+            <div class="field"><label>API Key</label><input type="password" id="rbgKey" placeholder="粘贴你的 Remove.bg API Key"></div>
+            <button class="btn-primary" onclick="saveSettings()">保存配置</button>
+            <div class="status-bar" id="setStatus" style="margin-top:12px">
+              <span class="dot" id="setDot"></span>
+              <span id="setMsg">未配置</span>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <h2>云端存储配置（共享图库必需）</h2>
+            <p class="desc">图片存储在 Cloudinary，数据库使用 Supabase，实现多人共享同步。</p>
+            <div class="config-steps">
+              <details>
+                <summary>① Cloudinary 配置（存图片）</summary>
+                <div class="step-content">
+                  <p>1. 注册 <a href="https://cloudinary.com" target="_blank">cloudinary.com↗</a>（免费）</p>
+                  <p>2. 进入 Dashboard，找到 Cloud Name、API Key、API Secret</p>
+                  <p>3. 在 Settings → Upload 中创建一个 <strong>Upload Preset</strong>（选 Unsigned）</p>
+                  <div class="field"><label>Cloud Name</label><input type="text" id="cdnName" placeholder="your-cloud-name"></div>
+                  <div class="field"><label>Upload Preset</label><input type="text" id="cdnPreset" placeholder="your-upload-preset"></div>
+                </div>
+              </details>
+              <details>
+                <summary>② Supabase 配置（存数据）</summary>
+                <div class="step-content">
+                  <p>1. 注册 <a href="https://supabase.com" target="_blank">supabase.com↗</a>（免费）</p>
+                  <p>2. 新建项目，进入 SQL Editor 执行以下建表语句：</p>
+                  <pre class="code-block">CREATE TABLE assets (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  brand text NOT NULL,
+  name text NOT NULL,
+  category text,
+  image_url text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow all" ON assets FOR ALL USING (true);</pre>
+                  <p>3. 在 Project Settings → API 找到 URL 和 anon key</p>
+                  <div class="field"><label>Supabase URL</label><input type="text" id="sbUrl" placeholder="https://xxx.supabase.co"></div>
+                  <div class="field"><label>Anon Key</label><input type="password" id="sbKey" placeholder="eyJ..."></div>
+                </div>
+              </details>
+            </div>
+            <button class="btn-primary" onclick="saveSettings()" style="margin-top:16px">保存全部配置</button>
+          </div>
+
+          <div class="section-card danger-zone">
+            <h2>危险操作</h2>
+            <button class="btn-danger" onclick="clearAll()">清空本地缓存</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
